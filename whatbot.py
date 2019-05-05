@@ -35,6 +35,7 @@ def sendMsg(msg, name, driver):
 
 driver = webdriver.Chrome() #Create a drier and open whatsapp web
 driver.get("https://web.whatsapp.com/")
+
 input('Scan the barcode, wait for it to load and press Enter.')
 
 names = list() #Create the list of names to send messages to.
@@ -81,6 +82,7 @@ while True:
 
             try: #Try sending the message
                 sendMsg(msg, name, driver) #Send message
+                count = count + 1
                 tempPath = pathBase % 'temp' #Create a temporary file for listing the remaining names to send message to
                 with open(namesPath, 'r', encoding='utf-8', newline='') as nameFile:
                     delFlag = True
@@ -94,16 +96,23 @@ while True:
                 shutil.move(tempPath, namesPath)
                 if (delFlag): #Removes the file if it is empty
                     os.remove(namesPath)
-                count = count + 1
+
+            except keyboard:
+                print('Bye')
+                continue
+
             except common.exceptions.NoSuchElementException as e: #Didn't find the "Back" button.
                 pass
+
             except: #Click the "Back" button.
                 backBut = WebDriverWait(driver, 10000000000000000000).until(
                     EC.element_to_be_clickable((By.XPATH, '//span[@data-icon="back-light"]')))
                 backBut.click()
+
             time.sleep(3)
 
         print(str(count) + ' messages have been sent out of ' + str(names.__len__()))
+
     else:
         break
 
