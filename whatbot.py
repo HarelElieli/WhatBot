@@ -56,7 +56,7 @@ while True:
         fileName = input('הכנס שם קובץ CSV: ') #Collect data for preparing messages
         path = pathBase % fileName
         filt = input('הכנס מסנן: ')
-        filtNum = input('הכנס את מספר המילה באיש הקשר לפיה תרצה לסנן: ')
+        filtNum = int(input('הכנס את מספר המילה באיש הקשר לפיה תרצה לסנן: '))
         msgBase = input('הכנס הודעה: ')
 
         namesPath = pathBase % namesToDo_fileName
