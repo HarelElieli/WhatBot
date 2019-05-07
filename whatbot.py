@@ -11,14 +11,22 @@ import keyboard
 import threading
 from preRun import preRun
 import os
+import caffeine
 import easygui
 import random
+import sys
+import subprocess
 
 def sendMsg(msg, name, driver):
     print(name)
     newChat = driver.find_element_by_xpath('//*[@id="side"]/header/div[2]/div/span/div[2]/div')
     newChat.click()
-    chatName = driver.find_element_by_xpath('//input[@title="חפש אנשי קשר"]')
+
+    try:
+        chatName = driver.find_element_by_xpath('//input[@title="חפש אנשי קשר"]') #Bug fix
+    except:
+        chatName = driver.find_element_by_xpath('//input[@title="Search contacts"]')
+
     chatName.send_keys(name)
     time.sleep(2)
     if(name.isdigit()):
@@ -33,7 +41,7 @@ def sendMsg(msg, name, driver):
     time.sleep(2)
     button.click()
 
-driver = webdriver.Chrome() #Create a drier and open whatsapp web
+driver = webdriver.Chrome() #Create a driver and open whatsapp web
 driver.get("https://web.whatsapp.com/")
 input('Scan the barcode, wait for it to load and press Enter.')
 
@@ -45,19 +53,17 @@ while True:
 
     if(input('Type something to start an action, Leave empty to finish: ')):
 
-        print('הכנס שם קובץ CSV') #Collect data for preparing messages
-        fileName = input()
+        fileName = input('הכנס שם קובץ CSV: ') #Collect data for preparing messages
         path = pathBase % fileName
-        print('הכנס מסנן')
-        filt = input()
-        print('הכנס הודעה')
-        msgBase = input()
+        filt = input('הכנס מסנן: ')
+        filtNum = input('הכנס את מספר המילה באיש הקשר לפיה תרצה לסנן: ')
+        msgBase = input('הכנס הודעה: ')
 
         namesPath = pathBase % namesToDo_fileName
         shutil.copyfile(path, namesPath) #Duplicate the names original CSV for manipultaion
 
         if filt:
-            preRun(filt, -1, pathBase, namesToDo_fileName) #Manipulate the CSV copy and filter it before running
+            preRun(filt, filtNum, pathBase, namesToDo_fileName) #Manipulate the CSV copy and filter it before running
         with open(namesPath, 'r', encoding="utf-8") as data_file: #Prepare the names list for a run
             csv_reader = csv.reader(data_file)
             names = []
@@ -68,11 +74,14 @@ while True:
                 except:
                     pass
 
-        time.sleep(2)
+        time.sleep(4)
 
         count = 0
 
+        caffeine.on(display=True) #Prevents screen to sleep on MacOS
+
         for name in names: #Send message to all names list
+
             firstName = name.split(' ', 1)[0]
             if (msgBase.find('%s') != -1): #Prepare the message before sending
                 msg = msgBase % firstName
@@ -88,7 +97,7 @@ while True:
                     with open(tempPath, 'w', encoding='utf-8', newline='') as tempFile:
                         csv_writer = csv.writer(tempFile)
                         for line in csv_reader:
-                            if (line[0] != name): #Document all the names but the one tjat just got a message
+                            if (line[0] != name): #Document all the names but the one that just got a message
                                 csv_writer.writerow(line)
                                 delFlag = False #To make sure the file is not empty
                 shutil.move(tempPath, namesPath)
@@ -102,6 +111,8 @@ while True:
                     EC.element_to_be_clickable((By.XPATH, '//span[@data-icon="back-light"]')))
                 backBut.click()
             time.sleep(3)
+
+        caffeine.off() #Allows screen to sleep from now and on
 
         print(str(count) + ' messages have been sent out of ' + str(names.__len__()))
     else:
