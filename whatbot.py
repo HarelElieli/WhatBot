@@ -90,24 +90,11 @@ while True:
 
             try: #Try sending the message
                 sendMsg(msg, name, driver) #Send message
-                tempPath = pathBase % 'temp' #Create a temporary file for listing the remaining names to send message to
-                with open(namesPath, 'r', encoding='utf-8', newline='') as nameFile:
-                    delFlag = True
-                    csv_reader = csv.reader(nameFile)
-                    with open(tempPath, 'w', encoding='utf-8', newline='') as tempFile:
-                        csv_writer = csv.writer(tempFile)
-                        for line in csv_reader:
-                            if (line[0] != name): #Document all the names but the one that just got a message
-                                csv_writer.writerow(line)
-                                delFlag = False #To make sure the file is not empty
-                shutil.move(tempPath, namesPath)
-                if (delFlag): #Removes the file if it is empty
-                    os.remove(namesPath)
                 count = count + 1
             except common.exceptions.NoSuchElementException as e: #Didn't find the "Back" button.
                 pass
             except: #Click the "Back" button.
-                backBut = WebDriverWait(driver, 10000000000000000000).until(
+                backBut = WebDriverWait(driver, 3).until(
                     EC.element_to_be_clickable((By.XPATH, '//span[@data-icon="back-light"]')))
                 backBut.click()
             time.sleep(3)
